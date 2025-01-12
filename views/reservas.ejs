@@ -4,27 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Reservas</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <header class="toolbar">
-        <h1>Mis Reservas</h1>
+    <header class="toolbar event-toolbar">
+        <a href="/menu" class="back-button">
+          <span class="back-arrow">&#8592;</span> Volver al menú
+        </a>
+        <h1>Reservas realizadas</h1>
     </header>
 
-    <main>
-        <h2>Reservas realizadas</h2>
-        <ul>
-            <% if (reservas.length === 0) { %>
-                <li>No tienes reservas.</li>
-            <% } else { %>
-                <% reservas.forEach(reserva => { %>
-                    <li>
-                        Evento: <%= reserva.evento %><br>
-                        Entradas: <%= reserva.entradas %><br>
-                        Fecha de Reserva: <%= reserva.fecha %><br>
-                    </li>
-                <% }); %>
-            <% } %>
-        </ul>
-    </main>
+            <main class="reservas-container">
+                <ul class="event-details">
+                    <% if (reservas.length === 0) { %>
+                        <li class="no-reservas">No tienes reservas.</li>
+                    <% } else { %>
+                        <% reservas.forEach(reserva => { %>
+                            <li class="reserva-item">
+                                <div class="reserva-info">
+                                    <p><strong>Evento:</strong> <%= reserva.evento %></p>
+                                    <p><strong>Entradas:</strong> <%= reserva.entradas %></p>
+                                    <p><strong>Fecha de Reserva:</strong> <%= reserva.fecha %></p>
+                                </div>
+                            </li>
+                        <% }); %>
+                    <% } %>
+                </ul>
+            </main>
+        </div>
+    </div>
 </body>
 </html>

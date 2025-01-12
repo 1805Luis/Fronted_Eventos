@@ -381,23 +381,30 @@ app.post("/reserva/:eventId", async (req, res) => {
 });
 
 app.get('/reservas', async (req, res) => {
+
+  const dbAvailable = await isDatabaseAvailable();
+
+  if (dbAvailable) {
   // Supongamos que el dni del usuario está almacenado en la sesión
-  const userDni = req.session.dni;
+    const userDni = req.session.dni;
 
-  if (!userDni) {
-      return res.redirect('/login'); // Redirige al login si no está logueado
-  }
+    if (!userDni) {
+        return res.redirect('/login'); // Redirige al login si no está logueado
+    }
 
-  try {
-      // Aquí podrías hacer una consulta a la base de datos o a una API externa para obtener las reservas
-      const reservasResponse = await axios.get(`http://api-gateway:3010/reservas/${userDni}`);
-      const reservas = reservasResponse.data; // Suponiendo que la respuesta contiene un array de reservas
+    try {
+        // Aquí podrías hacer una consulta a la base de datos o a una API externa para obtener las reservas
+        const reservasResponse = await axios.get(`http://api-gateway:3010/reservas/${userDni}`);
+        const reservas = reservasResponse.data; // Suponiendo que la respuesta contiene un array de reservas
 
-      // Renderizar la página de reservas
-      res.render('reservas', { reservas });
-  } catch (error) {
-      console.error("Error al obtener las reservas:", error);
-      res.status(500).send("Error al cargar las reservas");
+        // Renderizar la página de reservas
+        res.render('reservas', { reservas });
+    } catch (error) {
+        console.error("Error al obtener las reservas:", error);
+        res.status(500).send("Error al cargar las reservas");
+    }
+  }else{
+    { res.render('reservas', { reservas: [] }); }
   }
 });
 

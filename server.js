@@ -319,24 +319,86 @@ app.post("/reserva/:eventId", async (req, res) => {
     return res.status(404).send("Evento no encontrado");
   }
 
-  const dni = req.session.dni;
+  const userDni  = req.session.dni;
+
+  if (!userDni) {
+    return res.redirect("/login");
+  }
 
   // Procesar la reserva
   let totalPrice = 0;
+  let entradas = {};
+  let entradasMessage = '';
+
   for (let category of event.categories) {
     const quantity = parseInt(req.body[`category_${category.type}`]) || 0;
+    
     if (quantity > 0) {
       if (quantity > category.availableSeats) {
         return res.status(400).send(`No hay suficientes asientos disponibles en la categoría ${category.type}`);
       }
       totalPrice += category.precio * quantity;
       category.availableSeats -= quantity; // Reducir los asientos disponibles
+
+      // Actualizar las entradas seleccionadas para esta categoría
+      entradas[category.type] = (entradas[category.type] || 0) + quantity;
     }
   }
 
-  selectedSeats.push({ event: event.name, totalPrice, details: req.body });
+  if (dbAvailable) {
+
+    const reservaData = {
+      id_evento: eventId,
+      id_usuario: userDni, 
+      entradas: entradasMessage 
+    };
+
+    try {
+      const response = await axios.post(`http://api-gateway:3010/reservas/reserva`, reservaData);
+      console.log('Reserva creada con éxito:', response.data);
+      const updatedEvent = {
+        ...event, 
+        categories: event.categories.map(category => {
+          const reservedSeats = entradas[category.type] || 0;
+          category.availableSeats -= reservedSeats;
+          return category;
+        })
+      };
+
+      // Enviar la solicitud PUT para actualizar el evento
+      await axios.put(`http://api-gateway:3010/eventos/eventos/${eventId}`, updatedEvent);
+    } catch (error) {
+      console.error("Error al realizar la reserva:", error);
+      res.status(500).send("Error al procesar la reserva");
+    }
+  } else {
+    selectedSeats.push({ event: event.name, totalPrice, details: req.body });
+  }
+
+  
 
   res.render("menu", { events });
+});
+
+app.get('/reservas', async (req, res) => {
+  // Supongamos que el dni del usuario está almacenado en la sesión
+  const userDni = req.session.dni;
+
+  if (!userDni) {
+      return res.redirect('/login'); // Redirige al login si no está logueado
+  }
+
+  try {
+      // Aquí podrías hacer una consulta a la base de datos o a una API externa para obtener las reservas
+      const reservasResponse = await axios.get(`http://api-gateway:3010/reservas/${userDni}`);
+      const reservas = reservasResponse.data; // Suponiendo que la respuesta contiene un array de reservas
+
+      // Renderizar la página de reservas
+      res.render('reservas', { reservas });
+  } catch (error) {
+      console.error("Error al obtener las reservas:", error);
+      res.status(500).send("Error al cargar las reservas");
+  }
 });
 
 // Iniciar servidor

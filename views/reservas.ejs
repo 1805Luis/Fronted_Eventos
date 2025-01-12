@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reservas</title>
+</head>
+<body>
+    <header class="toolbar">
+        <h1>Mis Reservas</h1>
+    </header>
+
+    <main>
+        <h2>Reservas realizadas</h2>
+        <ul>
+            <% if (reservas.length === 0) { %>
+                <li>No tienes reservas.</li>
+            <% } else { %>
+                <% reservas.forEach(reserva => { %>
+                    <li>
+                        Evento: <%= reserva.evento %><br>
+                        Entradas: <%= reserva.entradas %><br>
+                        Fecha de Reserva: <%= reserva.fecha %><br>
+                    </li>
+                <% }); %>
+            <% } %>
+        </ul>
+    </main>
+</body>
+</html>

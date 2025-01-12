@@ -216,7 +216,7 @@ app.post("/register", async (req, res) => {
 
   if (dbAvailable) {
     try {
-      const response = await axios.post('http://database/users', { name, username, password }); // Cambia la URL según tu API de base de datos
+      const response = await axios.post('http://api-gateway:3010/api/usuarios/user', {username, password, name }); // Cambia la URL según tu API de base de datos
       res.redirect("/menu");
     } catch (error) {
       console.error("Error al registrar el usuario:", error);
@@ -242,7 +242,7 @@ app.get("/menu", async (req, res) => {
   let eventList = [];
   if (dbAvailable) {
     try {
-      const response = await axios.get('http://database/events'); // Cambia la URL según tu API de base de datos
+      const response = await axios.get('http://api-gateway:3010/api/eventos/eventos'); // Cambia la URL según tu API de base de datos
       eventList = response.data || []; // Asegurarse de que sea un arreglo
     } catch (error) {
       console.error("Error al obtener los eventos:", error);

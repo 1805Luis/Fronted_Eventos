@@ -139,7 +139,7 @@ let selectedSeats = [];
 const isDatabaseAvailable = async () => {
   try {
     // Hacer una solicitud al API Gateway para verificar si está activo
-    const response = await axios.get('http://api-gateway:3000/health'); // Cambia la URL si es necesario
+    const response = await axios.get('http://api-gateway:3010/health');
 
     if (response.status === 200) {
       console.log('API Gateway está disponible');

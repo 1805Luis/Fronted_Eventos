@@ -176,8 +176,9 @@ app.post("/login", async (req, res) => {
   if (dbAvailable) {
     // Intentar buscar el usuario en la base de datos
     try {
-      const response = await axios.get(`http://database/users/${username}`); // Cambia la URL según tu API de base de datos
+      const response = await axios.get(`http://api-gateway:3010/api/usuarios/user/${username}`);
       const user = response.data;
+      console.log(user)
       if (user && user.password === password) {
         res.redirect("/menu");
       } else {

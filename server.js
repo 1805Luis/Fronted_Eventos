@@ -345,68 +345,13 @@ app.post("/reserva/:eventId", async (req, res) => {
     }
   }
 
-  if (dbAvailable) {
-
-    const reservaData = {
-      id_evento: eventId,
-      id_usuario: userDni, 
-      entradas: entradasMessage 
-    };
-
-    try {
-      const response = await axios.post(`http://api-gateway:3010/reservas/reserva`, reservaData);
-      console.log('Reserva creada con éxito:', response.data);
-      const updatedEvent = {
-        ...event, 
-        categories: event.categories.map(category => {
-          const reservedSeats = entradas[category.type] || 0;
-          category.availableSeats -= reservedSeats;
-          return category;
-        })
-      };
-
-      // Enviar la solicitud PUT para actualizar el evento
-      await axios.put(`http://api-gateway:3010/eventos/eventos/${eventId}`, updatedEvent);
-    } catch (error) {
-      console.error("Error al realizar la reserva:", error);
-      res.status(500).send("Error al procesar la reserva");
-    }
-  } else {
     selectedSeats.push({ event: event.name, totalPrice, details: req.body });
-  }
 
   
 
   res.render("menu", { events });
 });
 
-app.get('/reservas', async (req, res) => {
-
-  const dbAvailable = await isDatabaseAvailable();
-
-  if (dbAvailable) {
-  // Supongamos que el dni del usuario está almacenado en la sesión
-    const userDni = req.session.dni;
-
-    if (!userDni) {
-        return res.redirect('/login'); // Redirige al login si no está logueado
-    }
-
-    try {
-        // Aquí podrías hacer una consulta a la base de datos o a una API externa para obtener las reservas
-        const reservasResponse = await axios.get(`http://api-gateway:3010/reservas/${userDni}`);
-        const reservas = reservasResponse.data; // Suponiendo que la respuesta contiene un array de reservas
-
-        // Renderizar la página de reservas
-        res.render('reservas', { reservas });
-    } catch (error) {
-        console.error("Error al obtener las reservas:", error);
-        res.status(500).send("Error al cargar las reservas");
-    }
-  }else{
-    { res.render('reservas', { reservas: [] }); }
-  }
-});
 
 // Iniciar servidor
 app.listen(port, () => {

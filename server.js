@@ -4,6 +4,17 @@ const axios = require("axios");
 const app = express();
 const port = 3000;
 
+const apiGatewayHost = 'api-gateway';  
+const apiGatewayPort = 3010; 
+
+const session = require("express-session");
+
+app.use(session({
+  secret: 'tu-secreto', 
+  resave: false,
+  saveUninitialized: true,
+}));
+
 // Configuración
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -139,7 +150,7 @@ let selectedSeats = [];
 const isDatabaseAvailable = async () => {
   try {
     // Hacer una solicitud al API Gateway para verificar si está activo
-    const response = await axios.get('http://api-gateway:3010/health');
+    const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/health`);
 
     if (response.status === 200) {
       console.log('API Gateway está disponible');
@@ -176,10 +187,10 @@ app.post("/login", async (req, res) => {
   if (dbAvailable) {
     // Intentar buscar el usuario en la base de datos
     try {
-      const response = await axios.get(`http://api-gateway:3010/api/usuarios/user/${username}`);
+      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/usuarios/user/${username}`);
       const user = response.data;
-      console.log(user)
       if (user && user.clave === password) {
+        req.session.dni = user.dni;
         res.redirect("/menu");
       } else {
         res.redirect("/login?error=Error%20DNI%20y/o%20clave%20incorrectos");
@@ -192,6 +203,7 @@ app.post("/login", async (req, res) => {
     // Usar datos simulados si la base de datos no está disponible
     const user = users.find(u => u.dni === username);
     if (user && user.clave === password) {
+      req.session.dni = user.dni;
       res.redirect("/menu");
     } else {
       res.redirect("/login?error=Error%20DNI%20y/o%20clave%20incorrectos");
@@ -216,7 +228,8 @@ app.post("/register", async (req, res) => {
 
   if (dbAvailable) {
     try {
-      const response = await axios.post('http://api-gateway:3010/api/usuarios/user', {username, password, name }); // Cambia la URL según tu API de base de datos
+      const response = await axios.post(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/usuarios/user`, {username, password, name }); // Cambia la URL según tu API de base de datos
+      req.session.dni = username;
       res.redirect("/menu");
     } catch (error) {
       console.error("Error al registrar el usuario:", error);
@@ -231,6 +244,7 @@ app.post("/register", async (req, res) => {
 
     // Agregar nuevo usuario a la base de datos simulada
     users.push({ name, username, password });
+    req.session.dni = username;
     res.redirect("/menu");
   }
 });
@@ -242,7 +256,7 @@ app.get("/menu", async (req, res) => {
   let eventList = [];
   if (dbAvailable) {
     try {
-      const response = await axios.get('http://api-gateway:3010/api/eventos/eventos'); // Cambia la URL según tu API de base de datos
+      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/eventos/eventos`); 
       eventList = response.data || []; // Asegurarse de que sea un arreglo
     } catch (error) {
       console.error("Error al obtener los eventos:", error);
@@ -266,7 +280,7 @@ app.get("/evento/:id", async (req, res) => {
   let event;
   if (dbAvailable) {
     try {
-      const response = await axios.get(`http://database/events/${eventId}`);
+      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/eventos/eventos/${eventId}`);
       event = response.data;
     } catch (error) {
       console.error("Error al obtener el evento:", error);
@@ -291,7 +305,7 @@ app.post("/reserva/:eventId", async (req, res) => {
   let event;
   if (dbAvailable) {
     try {
-      const response = await axios.get(`http://database/events/${eventId}`); 
+      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/eventos/eventos/${eventId}`); 
       event = response.data;
     } catch (error) {
       console.error("Error al obtener el evento:", error);
@@ -304,6 +318,8 @@ app.post("/reserva/:eventId", async (req, res) => {
   if (!event) {
     return res.status(404).send("Evento no encontrado");
   }
+
+  const dni = req.session.dni;
 
   // Procesar la reserva
   let totalPrice = 0;

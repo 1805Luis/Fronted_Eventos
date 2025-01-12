@@ -179,7 +179,7 @@ app.post("/login", async (req, res) => {
       const response = await axios.get(`http://api-gateway:3010/api/usuarios/user/${username}`);
       const user = response.data;
       console.log(user)
-      if (user && user.password === password) {
+      if (user && user.clave === password) {
         res.redirect("/menu");
       } else {
         res.redirect("/login?error=Error%20DNI%20y/o%20clave%20incorrectos");

@@ -150,7 +150,7 @@ let selectedSeats = [];
 const isDatabaseAvailable = async () => {
   try {
     // Hacer una solicitud al API Gateway para verificar si está activo
-    const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/health`);
+    const response = await axios.get(`http://api-gateway:3010/health`);
 
     if (response.status === 200) {
       console.log('API Gateway está disponible');
@@ -187,7 +187,7 @@ app.post("/login", async (req, res) => {
   if (dbAvailable) {
     // Intentar buscar el usuario en la base de datos
     try {
-      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/usuarios/user/${username}`);
+      const response = await axios.get(`http://api-gateway:3010/api/usuarios/user/${username}`);
       const user = response.data;
       if (user && user.clave === password) {
         req.session.dni = user.dni;
@@ -228,7 +228,7 @@ app.post("/register", async (req, res) => {
 
   if (dbAvailable) {
     try {
-      const response = await axios.post(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/usuarios/user`, {username, password, name }); // Cambia la URL según tu API de base de datos
+      const response = await axios.post(`http://api-gateway:3010/api/usuarios/user`, {username, password, name }); 
       req.session.dni = username;
       res.redirect("/menu");
     } catch (error) {
@@ -256,7 +256,7 @@ app.get("/menu", async (req, res) => {
   let eventList = [];
   if (dbAvailable) {
     try {
-      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/eventos/eventos`); 
+      const response = await axios.get(`http://http://api-gateway:3010/api/eventos/eventos`); 
       eventList = response.data || []; // Asegurarse de que sea un arreglo
     } catch (error) {
       console.error("Error al obtener los eventos:", error);
@@ -280,7 +280,7 @@ app.get("/evento/:id", async (req, res) => {
   let event;
   if (dbAvailable) {
     try {
-      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/eventos/eventos/${eventId}`);
+      const response = await axios.get(`http://api-gateway:3010/api/eventos/eventos/${eventId}`);
       event = response.data;
     } catch (error) {
       console.error("Error al obtener el evento:", error);
@@ -305,7 +305,7 @@ app.post("/reserva/:eventId", async (req, res) => {
   let event;
   if (dbAvailable) {
     try {
-      const response = await axios.get(`http://http://${apiGatewayHost}:${apiGatewayPort}/api/eventos/eventos/${eventId}`); 
+      const response = await axios.get(`http://api-gateway:3010/api/eventos/eventos/${eventId}`); 
       event = response.data;
     } catch (error) {
       console.error("Error al obtener el evento:", error);
